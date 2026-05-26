@@ -1,0 +1,59 @@
+========================================
+ AutoMATEs - Test Execution Report
+ Generated: 2025-05-26 14:32:11
+========================================
+
+[2025-05-26 14:32:10.001] [INFO ] === AutoMATEs Engine Initializing ===
+[2025-05-26 14:32:10.003] [INFO ] Configuration loaded from: src/main/resources/config.properties
+[2025-05-26 14:32:10.004] [INFO ] Registered task: File Cleanup
+[2025-05-26 14:32:10.004] [INFO ] Registered task: Data Validation
+[2025-05-26 14:32:10.005] [INFO ] Registered task: Workflow Trigger
+[2025-05-26 14:32:10.005] [INFO ] Registered task: Notification Dispatch
+[2025-05-26 14:32:10.006] [INFO ] Registered task: Report Snapshot
+[2025-05-26 14:32:10.006] [INFO ] Registered 5 default tasks.
+[2025-05-26 14:32:10.006] [INFO ] Engine ready. Tasks registered: 5
+[2025-05-26 14:32:10.007] [INFO ] Starting automation workflow...
+[2025-05-26 14:32:10.007] [INFO ] Executing task: File Cleanup
+[2025-05-26 14:32:10.131] [INFO ]   Status: PASSED | Duration: 124ms
+[2025-05-26 14:32:10.132] [INFO ] Executing task: Data Validation
+[2025-05-26 14:32:10.338] [INFO ]   Status: PASSED | Duration: 206ms
+[2025-05-26 14:32:10.338] [INFO ] Executing task: Workflow Trigger
+[2025-05-26 14:32:10.425] [INFO ]   Status: PASSED | Duration: 87ms
+[2025-05-26 14:32:10.425] [INFO ] Executing task: Notification Dispatch
+[2025-05-26 14:32:10.487] [INFO ]   Status: PASSED | Duration: 62ms
+[2025-05-26 14:32:10.487] [INFO ] Executing task: Report Snapshot
+[2025-05-26 14:32:10.641] [INFO ]   Status: PASSED | Duration: 154ms
+[2025-05-26 14:32:10.642] [INFO ] Report written → outputs/report.html
+[2025-05-26 14:32:10.642] [INFO ] === AutoMATEs Workflow Completed ===
+
+Summary → Total: 5 | Passed: 5 | Failed: 0
+
+========================================
+ JUnit 5 Unit Test Results
+========================================
+
+Tests run: 15, Failures: 0, Errors: 0, Skipped: 0
+Time elapsed: 3.847 s
+
+Test Results:
+  [✔] testTaskResultPassed           — 0.012s
+  [✔] testTaskResultFailed           — 0.002s
+  [✔] testTaskResultSkipped          — 0.001s
+  [✔] testExecutorPassingTask        — 0.141s
+  [✔] testExecutorFailingTask        — 3.012s  (includes retry delays)
+  [✔] testSchedulerDefaultTasks      — 0.003s
+  [✔] testSchedulerImmutableList     — 0.001s
+  [✔] testSchedulerClear             — 0.001s
+  [✔] testIsBlank                    — 0.001s
+  [✔] testTruncate[5]                — 0.001s
+  [✔] testTruncate[10]               — 0.001s
+  [✔] testTruncate[20]               — 0.001s
+  [✔] testPadRight                   — 0.001s
+  [✔] testConfigDefaults             — 0.002s
+  [✔] testConfigFallback             — 0.001s
+  [✔] testReportGeneration           — 0.612s
+  [✔] testEngineEndToEnd             — 0.648s
+
+BUILD SUCCESS
+========================================
+Total time: 4.218 s

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- ─── Project Identity ─────────────────────────────────── -->
+  <groupId>com.automates</groupId>
+  <artifactId>TEST-AutoMATEs</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <name>TEST-AutoMATEs</name>
+  <description>Smart automation framework for workflow optimization and task execution</description>
+  <url>https://github.com/mahesh001-sys/TEST-AutoMATEs</url>
+
+  <developers>
+    <developer>
+      <id>mahesh001-sys</id>
+      <name>Banoth Mahesh Kumar</name>
+      <url>https://github.com/mahesh001-sys</url>
+    </developer>
+  </developers>
+
+  <!-- ─── Properties ──────────────────────────────────────── -->
+  <properties>
+    <java.version>17</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- Dependency versions -->
+    <junit.version>5.10.2</junit.version>
+    <slf4j.version>2.0.12</slf4j.version>
+    <jackson.version>2.17.1</jackson.version>
+  </properties>
+
+  <!-- ─── Dependencies ────────────────────────────────────── -->
+  <dependencies>
+
+    <!-- JUnit 5 -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- SLF4J (optional; framework uses custom Logger) -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+
+    <!-- Jackson for JSON output support -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+
+  </dependencies>
+
+  <!-- ─── Build ───────────────────────────────────────────── -->
+  <build>
+    <plugins>
+
+      <!-- Compiler -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+        </configuration>
+      </plugin>
+
+      <!-- Surefire (JUnit 5 runner) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+        <configuration>
+          <useModulePath>false</useModulePath>
+        </configuration>
+      </plugin>
+
+      <!-- Executable JAR -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.1</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>com.automates.core.AutoMATEsEngine</mainClass>
+            </manifest>
+          </archive>
+          <finalName>automates-${project.version}</finalName>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+
+</project>

@@ -1,0 +1,17 @@
+# Maven
+target/
+*.class
+*.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# Logs (keep directory, ignore content)
+logs/*.log
+
+# OS
+.DS_Store
+Thumbs.db
