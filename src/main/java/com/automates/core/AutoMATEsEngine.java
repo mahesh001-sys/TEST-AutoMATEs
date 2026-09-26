@@ -1,5 +1,6 @@
 package com.automates.core;
 
+import com.automates.report.ReportGenerator;
 import com.automates.tasks.AutomationTask;
 import com.automates.tasks.TaskExecutor;
 import com.automates.tasks.TaskResult;
@@ -13,7 +14,8 @@ import java.util.List;
 /**
  * Main entry point for the AutoMATEs automation framework.
  *
- * The engine coordinates task scheduling and task execution.
+ * The engine coordinates task scheduling, task execution
+ * and report generation.
  */
 public class AutoMATEsEngine {
 
@@ -22,10 +24,12 @@ public class AutoMATEsEngine {
 
     private final TaskScheduler taskScheduler;
     private final TaskExecutor taskExecutor;
+    private final ReportGenerator reportGenerator;
 
     public AutoMATEsEngine(
             TaskScheduler taskScheduler,
-            TaskExecutor taskExecutor) {
+            TaskExecutor taskExecutor,
+            ReportGenerator reportGenerator) {
 
         if (taskScheduler == null) {
             throw new IllegalArgumentException(
@@ -37,14 +41,18 @@ public class AutoMATEsEngine {
                     "TaskExecutor cannot be null");
         }
 
+        if (reportGenerator == null) {
+            throw new IllegalArgumentException(
+                    "ReportGenerator cannot be null");
+        }
+
         this.taskScheduler = taskScheduler;
         this.taskExecutor = taskExecutor;
+        this.reportGenerator = reportGenerator;
     }
 
     /**
-     * Executes all registered tasks.
-     *
-     * Tasks that do not require input receive null.
+     * Executes all registered tasks and generates a report.
      *
      * @return list of task results
      */
@@ -56,12 +64,15 @@ public class AutoMATEsEngine {
                 "Starting AutoMATEs engine with {} task(s)",
                 taskScheduler.getTaskCount());
 
-        for (AutomationTask<?> task : taskScheduler.getTasks()) {
+        for (AutomationTask<?> task :
+                taskScheduler.getTasks()) {
 
             TaskResult result = executeTask(task);
 
             results.add(result);
         }
+
+        reportGenerator.generate(results);
 
         logger.info(
                 "AutoMATEs engine completed. Total tasks: {}",
@@ -101,5 +112,9 @@ public class AutoMATEsEngine {
 
     public TaskExecutor getTaskExecutor() {
         return taskExecutor;
+    }
+
+    public ReportGenerator getReportGenerator() {
+        return reportGenerator;
     }
 }
