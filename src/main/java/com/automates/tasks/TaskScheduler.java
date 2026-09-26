@@ -1,49 +1,55 @@
 package com.automates.tasks;
 
-import com.automates.core.AutomationTask;
-import com.automates.utils.Logger;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * Manages registration and ordering of automation tasks before execution.
- *
- * <p>Tasks are stored in insertion order. Future versions will support
- * priority queues and dependency graphs.</p>
- *
- * @author Banoth Mahesh Kumar
+ * Manages and executes a collection of automation tasks.
  */
 public class TaskScheduler {
 
-    private final List<AutomationTask> tasks  = new ArrayList<>();
-    private final Logger               logger = Logger.getInstance();
+    private final List<AutomationTask<?>> tasks;
 
-    /**
-     * Registers the default set of built-in automation tasks.
-     */
-    public void registerDefaultTasks() {
-        register(new FileCleanupTask());
-        register(new DataValidationTask());
-        register(new WorkflowTriggerTask());
-        register(new NotificationTask());
-        register(new ReportSnapshotTask());
-        logger.info("Registered " + tasks.size() + " default tasks.");
+    public TaskScheduler() {
+        this.tasks = new ArrayList<>();
     }
 
     /**
-     * Adds a custom task to the execution queue.
+     * Adds a task to the scheduler.
      *
-     * @param task the task to add
+     * @param task automation task
      */
-    public void register(AutomationTask task) {
+    public void addTask(AutomationTask<?> task) {
+
+        if (task == null) {
+            throw new IllegalArgumentException(
+                    "Task cannot be null");
+        }
+
         tasks.add(task);
-        logger.info("Registered task: " + task.getName());
     }
 
-    public List<AutomationTask> getTasks()   { return Collections.unmodifiableList(tasks); }
-    public int                  getTaskCount(){ return tasks.size(); }
+    /**
+     * Returns all registered tasks.
+     *
+     * @return unmodifiable task list
+     */
+    public List<AutomationTask<?>> getTasks() {
+        return Collections.unmodifiableList(tasks);
+    }
 
-    public void clear() { tasks.clear(); }
+    /**
+     * Returns the number of registered tasks.
+     */
+    public int getTaskCount() {
+        return tasks.size();
+    }
+
+    /**
+     * Removes all registered tasks.
+     */
+    public void clearTasks() {
+        tasks.clear();
+    }
 }
