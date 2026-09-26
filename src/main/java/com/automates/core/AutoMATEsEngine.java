@@ -1,76 +1,105 @@
 package com.automates.core;
 
+import com.automates.tasks.AutomationTask;
 import com.automates.tasks.TaskExecutor;
+import com.automates.tasks.TaskResult;
 import com.automates.tasks.TaskScheduler;
-import com.automates.utils.Logger;
-import com.automates.report.ReportGenerator;
-import com.automates.config.ConfigLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * AutoMATEsEngine — Core orchestrator for the TEST-AutoMATEs framework.
+ * Main entry point for the AutoMATEs automation framework.
  *
- * <p>Responsible for initializing the automation pipeline, managing task
- * execution lifecycle, and generating final reports.</p>
- *
- * @author  Banoth Mahesh Kumar
- * @version 1.0.0
- * @since   2025-01-01
+ * The engine coordinates task scheduling and task execution.
  */
 public class AutoMATEsEngine {
 
-    private final TaskScheduler scheduler;
-    private final TaskExecutor  executor;
-    private final ReportGenerator reporter;
-    private final Logger logger;
+    private static final Logger logger =
+            LoggerFactory.getLogger(AutoMATEsEngine.class);
 
-    public AutoMATEsEngine() {
-        this.logger    = Logger.getInstance();
-        this.scheduler = new TaskScheduler();
-        this.executor  = new TaskExecutor();
-        this.reporter  = new ReportGenerator();
-    }
+    private final TaskScheduler taskScheduler;
+    private final TaskExecutor taskExecutor;
 
-    /**
-     * Bootstraps the engine: loads config, registers tasks, and starts execution.
-     */
-    public void initialize() {
-        logger.info("=== AutoMATEs Engine Initializing ===");
-        ConfigLoader.load("src/main/resources/config.properties");
-        scheduler.registerDefaultTasks();
-        logger.info("Engine ready. Tasks registered: " + scheduler.getTaskCount());
-    }
+    public AutoMATEsEngine(
+            TaskScheduler taskScheduler,
+            TaskExecutor taskExecutor) {
 
-    /**
-     * Runs all registered automation tasks sequentially and collects results.
-     *
-     * @return list of {@link TaskResult} objects for each executed task
-     */
-    public List<TaskResult> run() {
-        initialize();
-        logger.info("Starting automation workflow...");
-
-        List<TaskResult> results = new ArrayList<>();
-        for (AutomationTask task : scheduler.getTasks()) {
-            logger.info("Executing task: " + task.getName());
-            TaskResult result = executor.execute(task);
-            results.add(result);
-            logger.info("  Status: " + result.getStatus() + " | Duration: " + result.getDurationMs() + "ms");
+        if (taskScheduler == null) {
+            throw new IllegalArgumentException(
+                    "TaskScheduler cannot be null");
         }
 
-        reporter.generate(results);
-        logger.info("=== AutoMATEs Workflow Completed ===");
+        if (taskExecutor == null) {
+            throw new IllegalArgumentException(
+                    "TaskExecutor cannot be null");
+        }
+
+        this.taskScheduler = taskScheduler;
+        this.taskExecutor = taskExecutor;
+    }
+
+    /**
+     * Executes all registered tasks.
+     *
+     * Tasks that do not require input receive null.
+     *
+     * @return list of task results
+     */
+    public List<TaskResult> run() {
+
+        List<TaskResult> results = new ArrayList<>();
+
+        logger.info(
+                "Starting AutoMATEs engine with {} task(s)",
+                taskScheduler.getTaskCount());
+
+        for (AutomationTask<?> task : taskScheduler.getTasks()) {
+
+            TaskResult result = executeTask(task);
+
+            results.add(result);
+        }
+
+        logger.info(
+                "AutoMATEs engine completed. Total tasks: {}",
+                results.size());
+
         return results;
     }
 
-    public static void main(String[] args) {
-        AutoMATEsEngine engine = new AutoMATEsEngine();
-        List<TaskResult> results = engine.run();
-        long passed = results.stream().filter(r -> r.getStatus() == TaskStatus.PASSED).count();
-        long failed = results.stream().filter(r -> r.getStatus() == TaskStatus.FAILED).count();
-        System.out.printf("%nSummary → Total: %d | Passed: %d | Failed: %d%n",
-                results.size(), passed, failed);
+    /**
+     * Executes a single task.
+     */
+    private TaskResult executeTask(
+            AutomationTask<?> task) {
+
+        return executeWithExecutor(task);
+    }
+
+    /**
+     * Uses the executor while keeping generic task handling
+     * inside the framework.
+     */
+    @SuppressWarnings("unchecked")
+    private TaskResult executeWithExecutor(
+            AutomationTask<?> task) {
+
+        AutomationTask<Object> executableTask =
+                (AutomationTask<Object>) task;
+
+        return taskExecutor.execute(
+                executableTask,
+                null);
+    }
+
+    public TaskScheduler getTaskScheduler() {
+        return taskScheduler;
+    }
+
+    public TaskExecutor getTaskExecutor() {
+        return taskExecutor;
     }
 }
