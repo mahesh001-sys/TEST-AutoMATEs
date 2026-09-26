@@ -11,7 +11,7 @@ A reusable Java 11 automation framework for task execution, scheduling, retry ha
 - Configurable retry handling
 - File cleanup automation
 - JSON data validation
-- HTML execution reports
+- HTML execution reporting
 - Structured logging with SLF4J + Log4j2
 - Configuration using `config.properties`
 - JUnit 5 automated testing
@@ -20,61 +20,56 @@ A reusable Java 11 automation framework for task execution, scheduling, retry ha
 
 ## 🏗️ Architecture
 
-AutoMATEsEngine  
-↓  
-TaskScheduler  
-↓  
-TaskExecutor  
-↓  
-AutomationTask  
-├── FileCleanupTask  
-└── DataValidationTask  
-↓  
-TaskResult  
-↓  
+AutoMATEsEngine
+↓
+TaskScheduler
+↓
+TaskExecutor
+↓
+AutomationTask
+├── FileCleanupTask
+└── DataValidationTask
+↓
+TaskResult
+↓
 ReportGenerator
 
 ## 📂 Project Structure
 
 | Directory / File | Purpose |
 |---|---|
-| `.github/workflows/` | GitHub Actions CI/CD workflow |
-| `src/main/java/com/automates/config/` | Framework configuration |
-| `src/main/java/com/automates/core/` | Main automation engine |
-| `src/main/java/com/automates/report/` | HTML report generation |
-| `src/main/java/com/automates/tasks/` | Task interfaces and execution components |
-| `src/main/java/com/automates/tasks/impl/` | Automation task implementations |
-| `src/main/resources/` | Configuration and logging files |
+| `.github/workflows/` | GitHub Actions CI/CD |
+| `src/main/java/` | Framework source code |
+| `src/main/resources/` | Configuration and logging |
 | `src/test/java/` | JUnit 5 test cases |
+| `outputs/` | Execution reports and test output |
+| `outputs/report.html` | HTML execution report |
+| `outputs/test-execution-output.txt` | Test execution output |
 | `pom.xml` | Maven configuration and dependencies |
 | `README.md` | Project documentation |
-
 
 ## 🧩 Core Components
 
 ### AutoMATEsEngine
-Central component that coordinates task scheduling, execution, result collection, and report generation.
+Coordinates task scheduling, execution, result collection, and report generation.
 
 ### TaskScheduler
-Registers and manages automation tasks before execution.
+Registers and manages automation tasks.
 
 ### TaskExecutor
-Executes tasks with configurable retry support, exception handling, logging, and execution-time tracking.
+Executes tasks with configurable retry handling, exception handling, logging, and execution-time tracking.
 
 ### AutomationTask
-Generic interface that provides a common contract for automation tasks.
+Generic interface providing a common contract for automation tasks.
 
 ### TaskResult
-Stores task name, success status, execution message, and execution time.
+Stores task name, execution status, message, and execution time.
 
 ### FileCleanupTask
 Identifies and deletes files older than the configured age.
 
 ### DataValidationTask
 Validates JSON files using Jackson.
-
-### ConfigLoader
-Loads framework configuration from `config.properties`.
 
 ### ReportGenerator
 Generates an HTML report containing task status, messages, and execution time.
@@ -85,11 +80,11 @@ The framework supports configurable retry execution through `TaskExecutor`.
 
 Example:
 
-Attempt 1 → Failed  
-Attempt 2 → Failed  
+Attempt 1 → Failed
+Attempt 2 → Failed
 Attempt 3 → Success
 
-The maximum number of attempts can be configured when creating the executor.
+The maximum number of attempts is configurable.
 
 ## 🛠️ Technology Stack
 
@@ -99,30 +94,18 @@ The maximum number of attempts can be configured when creating the executor.
 | Maven | Build & dependency management |
 | JUnit 5 | Automated testing |
 | Jackson | JSON validation |
-| SLF4J + Log4j2 | Structured logging |
+| SLF4J + Log4j2 | Logging |
 | Java NIO | File operations |
 | Git | Version control |
-| GitHub | Source control |
 | GitHub Actions | CI/CD |
 
 ## 🧪 Test Results
 
-Latest GitHub Actions execution:
+Latest verified GitHub Actions execution:
 
-Tests run: 18  
-Failures: 0  
-Errors: 0  
-Skipped: 0  
+**18 Tests | 0 Failures | 0 Errors | 0 Skipped**
 
-BUILD SUCCESS
-
-| Metric | Result |
-|---|---:|
-| Tests | 18 |
-| Failures | 0 |
-| Errors | 0 |
-| Skipped | 0 |
-| Build | ✅ SUCCESS |
+**BUILD SUCCESS ✅**
 
 ## 🚀 How to Run
 
@@ -132,9 +115,18 @@ BUILD SUCCESS
 - Maven
 - Git
 
-### Run Tests
+Run the test suite:
 
 `mvn clean test`
+
+## 📊 Execution Outputs
+
+The `outputs/` directory contains execution artifacts such as:
+
+- HTML automation report
+- Test execution output
+
+These artifacts provide visibility into task execution and test results.
 
 ## 🔄 CI/CD
 
@@ -151,9 +143,7 @@ Workflow:
 
 ## 🤖 AI-Assisted Development
 
-AI tools were used as a development-support resource during the project.
-
-AI assistance was used for:
+AI tools were used as a development-support resource for:
 
 - Understanding Java and automation concepts
 - Exploring implementation approaches
@@ -161,21 +151,19 @@ AI assistance was used for:
 - Identifying compilation issues
 - Debugging test failures
 - Improving documentation
-- Generating initial implementation ideas
 
-All AI-generated suggestions were reviewed, modified, tested, and integrated based on the actual project requirements.
+AI-generated suggestions were reviewed, modified, tested, and integrated based on the actual project requirements.
 
 The final implementation was validated through automated tests and GitHub Actions.
 
 ## 📈 Future Enhancements
 
 - Parallel task execution
-- Additional automation task implementations
-- Database validation tasks
-- REST API automation tasks
+- Additional automation tasks
+- Database validation
+- REST API automation
 - Enhanced HTML dashboards
 - Environment-specific configuration
-- Extended CI/CD reporting
 
 ## 👨‍💻 Author
 
@@ -184,7 +172,3 @@ The final implementation was validated through automated tests and GitHub Action
 B.Tech – Information Technology
 
 **Focus:** Java • QA Automation • Software Testing • Automation Frameworks • CI/CD
-
----
-
-⭐ Explore the source code and automated test implementation.
