@@ -1,93 +1,121 @@
 package com.automates.tasks;
 
-import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static org.junit.jupiter.api.Assertions.*;
+/**
+ * Executes automation tasks with retry support.
+ */
+public class TaskExecutor {
 
-class TaskExecutorTest {
+    private static final Logger logger =
+            LoggerFactory.getLogger(TaskExecutor.class);
 
-    @Test
-    void shouldExecuteSuccessfulTask() {
+    private final int maxAttempts;
 
-        AutomationTask<Void> task =
-                new AutomationTask<Void>() {
+    /**
+     * Creates a TaskExecutor.
+     *
+     * @param maxAttempts maximum number of attempts
+     */
+    public TaskExecutor(int maxAttempts) {
 
-                    @Override
-                    public String getTaskName() {
-                        return "Test Task";
-                    }
+        if (maxAttempts < 1) {
+            throw new IllegalArgumentException(
+                    "maxAttempts must be at least 1");
+        }
 
-                    @Override
-                    public TaskResult execute(Void input) {
-                        return TaskResult.success(
-                                getTaskName(),
-                                "Task completed",
-                                10);
-                    }
-                };
-
-        TaskExecutor executor =
-                new TaskExecutor(3);
-
-        TaskResult result =
-                executor.execute(task, null);
-
-        assertTrue(result.isSuccess());
-        assertEquals("Test Task", result.getTaskName());
-        assertEquals(
-                "Task completed",
-                result.getMessage());
+        this.maxAttempts = maxAttempts;
     }
 
-    @Test
-    void shouldRetryFailedTask() {
+    /**
+     * Executes a task with retry support.
+     *
+     * @param task task to execute
+     * @param input input required by the task
+     * @param <T> input type
+     * @return final TaskResult
+     */
+    public <T> TaskResult execute(
+            AutomationTask<T> task,
+            T input) {
 
-        AutomationTask<Void> task =
-                new AutomationTask<Void>() {
+        TaskResult lastResult = null;
 
-                    private int attempts = 0;
+        for (int attempt = 1;
+             attempt <= maxAttempts;
+             attempt++) {
 
-                    @Override
-                    public String getTaskName() {
-                        return "Retry Task";
-                    }
+            long startTime =
+                    System.currentTimeMillis();
 
-                    @Override
-                    public TaskResult execute(Void input) {
+            try {
 
-                        attempts++;
+                logger.info(
+                        "Executing task '{}' - attempt {}/{}",
+                        task.getTaskName(),
+                        attempt,
+                        maxAttempts);
 
-                        if (attempts < 3) {
-                            return TaskResult.failure(
-                                    getTaskName(),
-                                    "Temporary failure",
-                                    10);
-                        }
+                TaskResult result =
+                        task.execute(input);
 
-                        return TaskResult.success(
-                                getTaskName(),
-                                "Task succeeded after retry",
-                                10);
-                    }
-                };
+                long executionTime =
+                        System.currentTimeMillis()
+                                - startTime;
 
-        TaskExecutor executor =
-                new TaskExecutor(3);
+                if (result.isSuccess()) {
 
-        TaskResult result =
-                executor.execute(task, null);
+                    logger.info(
+                            "Task '{}' completed successfully on attempt {}",
+                            task.getTaskName(),
+                            attempt);
 
-        assertTrue(result.isSuccess());
-        assertEquals(
-                "Task succeeded after retry",
-                result.getMessage());
+                    return TaskResult.success(
+                            result.getTaskName(),
+                            result.getMessage(),
+                            executionTime);
+                }
+
+                lastResult = TaskResult.failure(
+                        result.getTaskName(),
+                        result.getMessage(),
+                        executionTime);
+
+                logger.warn(
+                        "Task '{}' failed on attempt {}: {}",
+                        task.getTaskName(),
+                        attempt,
+                        result.getMessage());
+
+            } catch (Exception e) {
+
+                long executionTime =
+                        System.currentTimeMillis()
+                                - startTime;
+
+                lastResult = TaskResult.failure(
+                        task.getTaskName(),
+                        e.getMessage(),
+                        executionTime);
+
+                logger.error(
+                        "Task '{}' threw an exception on attempt {}",
+                        task.getTaskName(),
+                        attempt,
+                        e);
+            }
+        }
+
+        logger.error(
+                "Task '{}' failed after {} attempts",
+                task.getTaskName(),
+                maxAttempts);
+
+        return lastResult;
     }
 
-    @Test
-    void shouldRejectInvalidMaxAttempts() {
-
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new TaskExecutor(0));
+    public int getMaxAttempts() {
+        return maxAttempts;
     }
 }
