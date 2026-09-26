@@ -1,3 +1,4 @@
+
 # Maven
 target/
 *.class
@@ -9,8 +10,11 @@ target/
 .vscode/
 *.swp
 
-# Logs (keep directory, ignore content)
+# Logs
 logs/*.log
+
+# Generated Reports
+reports/
 
 # OS
 .DS_Store
