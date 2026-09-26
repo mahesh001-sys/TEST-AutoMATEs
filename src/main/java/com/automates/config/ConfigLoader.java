@@ -1,61 +1,71 @@
 package com.automates.config;
 
-import com.automates.utils.Logger;
-
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * Loads and exposes application configuration from a {@code .properties} file.
- *
- * <p>Call {@link #load(String)} once at startup; then access values via
- * {@link #get(String)} or {@link #get(String, String)}.</p>
- *
- * @author Banoth Mahesh Kumar
+ * Loads framework configuration from config.properties.
  */
-public final class ConfigLoader {
+public class ConfigLoader {
 
-    private static final Properties props  = new Properties();
-    private static final Logger     logger = Logger.getInstance();
-    private static       boolean    loaded = false;
+    private final Properties properties;
 
-    private ConfigLoader() {}
+    public ConfigLoader() {
+        properties = new Properties();
+        loadProperties();
+    }
 
-    /**
-     * Loads properties from the given file path.
-     *
-     * @param path path to the {@code .properties} file
-     */
-    public static synchronized void load(String path) {
-        try (FileInputStream fis = new FileInputStream(path)) {
-            props.load(fis);
-            loaded = true;
-            logger.info("Configuration loaded from: " + path);
+    private void loadProperties() {
+
+        try (InputStream inputStream =
+                     getClass()
+                             .getClassLoader()
+                             .getResourceAsStream("config.properties")) {
+
+            if (inputStream == null) {
+                throw new IllegalStateException(
+                        "config.properties not found in classpath");
+            }
+
+            properties.load(inputStream);
+
         } catch (IOException e) {
-            logger.warn("Config file not found at '" + path + "' — using defaults.");
-            loadDefaults();
+            throw new IllegalStateException(
+                    "Unable to load config.properties",
+                    e);
         }
     }
 
-    /** Returns the value for {@code key}, or {@code null} if absent. */
-    public static String get(String key) {
-        return props.getProperty(key);
+    /**
+     * Returns a configuration value.
+     *
+     * @param key configuration key
+     * @return configuration value
+     */
+    public String get(String key) {
+
+        String value = properties.getProperty(key);
+
+        if (value == null) {
+            throw new IllegalArgumentException(
+                    "Configuration key not found: " + key);
+        }
+
+        return value.trim();
     }
 
-    /** Returns the value for {@code key}, or {@code defaultValue} if absent. */
-    public static String get(String key, String defaultValue) {
-        return props.getProperty(key, defaultValue);
+    /**
+     * Returns an integer configuration value.
+     */
+    public int getInt(String key) {
+        return Integer.parseInt(get(key));
     }
 
-    public static boolean isLoaded() { return loaded; }
-
-    private static void loadDefaults() {
-        props.setProperty("app.name",          "AutoMATEs");
-        props.setProperty("app.version",       "1.0.0");
-        props.setProperty("task.max.retries",  "2");
-        props.setProperty("report.output.dir", "outputs");
-        props.setProperty("log.level",         "INFO");
-        loaded = true;
+    /**
+     * Returns a boolean configuration value.
+     */
+    public boolean getBoolean(String key) {
+        return Boolean.parseBoolean(get(key));
     }
 }
