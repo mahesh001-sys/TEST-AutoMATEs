@@ -1,60 +1,114 @@
 package com.automates.tasks;
 
-import com.automates.core.AutomationTask;
-import com.automates.core.TaskResult;
-import com.automates.core.TaskStatus;
-import com.automates.utils.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Responsible for executing a single {@link AutomationTask} with retry logic,
- * timing, and structured error handling.
- *
- * @author Banoth Mahesh Kumar
+ * Executes automation tasks with retry support.
  */
 public class TaskExecutor {
 
-    private static final int    MAX_RETRIES     = 2;
-    private static final long   RETRY_DELAY_MS  = 500;
-    private final Logger logger = Logger.getInstance();
+    private static final Logger logger =
+            LoggerFactory.getLogger(TaskExecutor.class);
+
+    private final int maxAttempts;
 
     /**
-     * Executes a task with up to {@value #MAX_RETRIES} retries on failure.
+     * Creates a TaskExecutor.
      *
-     * @param task the automation task to execute
-     * @return {@link TaskResult} reflecting final status after all attempts
+     * @param maxAttempts maximum number of attempts
      */
-    public TaskResult execute(AutomationTask task) {
-        task.setUp();
-        long start = System.currentTimeMillis();
+    public TaskExecutor(int maxAttempts) {
 
-        for (int attempt = 1; attempt <= MAX_RETRIES + 1; attempt++) {
+        if (maxAttempts < 1) {
+            throw new IllegalArgumentException(
+                    "maxAttempts must be at least 1");
+        }
+
+        this.maxAttempts = maxAttempts;
+    }
+
+    /**
+     * Executes a task with retry support.
+     *
+     * @param task task to execute
+     * @param input input required by the task
+     * @param <T> input type
+     * @return final TaskResult
+     */
+    public <T> TaskResult execute(
+            AutomationTask<T> task,
+            T input) {
+
+        TaskResult lastResult = null;
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+
+            long startTime = System.currentTimeMillis();
+
             try {
-                TaskResult result = task.execute();
-                long duration = System.currentTimeMillis() - start;
+                logger.info(
+                        "Executing task '{}' - attempt {}/{}",
+                        task.getTaskName(),
+                        attempt,
+                        maxAttempts);
 
-                if (result.isPassed()) {
-                    task.tearDown();
-                    return TaskResult.passed(task.getName(), result.getMessage(), duration);
+                TaskResult result = task.execute(input);
+
+                long executionTime =
+                        System.currentTimeMillis() - startTime;
+
+                if (result.isSuccess()) {
+
+                    logger.info(
+                            "Task '{}' completed successfully on attempt {}",
+                            task.getTaskName(),
+                            attempt);
+
+                    return TaskResult.success(
+                            result.getTaskName(),
+                            result.getMessage(),
+                            executionTime);
                 }
 
-                logger.warn("Task '" + task.getName() + "' failed on attempt " + attempt);
+                lastResult = TaskResult.failure(
+                        result.getTaskName(),
+                        result.getMessage(),
+                        executionTime);
 
-            } catch (Exception ex) {
-                logger.error("Unexpected exception in '" + task.getName() + "': " + ex.getMessage());
-            }
+                logger.warn(
+                        "Task '{}' failed on attempt {}: {}",
+                        task.getTaskName(),
+                        attempt,
+                        result.getMessage());
 
-            if (attempt <= MAX_RETRIES) {
-                task.incrementRetry();
-                sleep(RETRY_DELAY_MS);
+            } catch (Exception e) {
+
+                long executionTime =
+                        System.currentTimeMillis() - startTime;
+
+                lastResult = TaskResult.failure(
+                        task.getTaskName(),
+                        e.getMessage(),
+                        executionTime);
+
+                logger.error(
+                        "Task '{}' threw an exception on attempt {}",
+                        task.getTaskName(),
+                        attempt,
+                        e);
             }
         }
 
-        long duration = System.currentTimeMillis() - start;
-        task.tearDown();
-        return TaskResult.failed(task.getName(), "Failed after " + (MAX_RETRIES + 1) + " attempts", duration);
+        logger.error(
+                "Task '{}' failed after {} attempts",
+                task.getTaskName(),
+                maxAttempts);
+
+        return lastResult;
     }
 
-    private void sleep(long ms) {
-        try { Thread.sleep(ms); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+    public int getMaxAttempts() {
+        return maxAttempts;
     }
 }
